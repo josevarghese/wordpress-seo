@@ -122,13 +122,29 @@ class WPSEO_Sitemaps_Renderer {
 
 		$output = '<?xml version="1.0" encoding="' . esc_attr( $this->output_charset ) . '"?>';
 
-		if ( $this->stylesheet ) {
+		$xsl            = apply_filters( 'wpseo_sitemap_xsl', '' );
+		$stylesheet_url = '';
+
+		if ( $xsl === '' ) {
 			/**
 			 * Filter the stylesheet URL for the XML sitemap.
 			 *
 			 * @param string $stylesheet Stylesheet URL.
 			 */
-			$output .= apply_filters( 'wpseo_stylesheet_url', $this->stylesheet ) . "\n";
+			$stylesheet_url = apply_filters( 'wpseo_stylesheet_url', '' );
+		}
+
+		if ( $stylesheet_url ) {
+			$output .= $stylesheet_url . PHP_EOL;
+		}
+
+		if ( $xsl === '' && $stylesheet_url === '' ) {
+			$sitemap_xsl = new WPSEO_Sitemap_XSL();
+			$output  = '<?xml version="1.0" encoding="utf-8"?>';
+			$output .= '<?xml-stylesheet type="text/xsl" href=""?>';
+			$output .= $sitemap_xsl->generate( $sitemap ) . PHP_EOL;
+
+			return $output;
 		}
 
 		$output .= $sitemap;
